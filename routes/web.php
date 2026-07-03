@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Billing\BillingController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Billing
+// Все роуты защищены стандартной сессией приложения
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    // 1. Роут для отображения самой страницы во Vue
+    Route::get('/billing', function () {
+        return Inertia::render('Billing/BillingDashboard');
+    })->name('billing.dashboard');
+
+    // 2. Роуты для получения данных и отправки формы (Inertia/Axios)
+    // Убираем из адреса префикс /api/, чтобы они работали через сессию веб-браузера
+    Route::get('/billing/dashboard-data', [BillingController::class, 'getDashboardData']);
+    Route::post('/billing/subscribe', [BillingController::class, 'purchaseSubscription']);
 });
 
 require __DIR__.'/auth.php';
